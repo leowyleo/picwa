@@ -2,7 +2,7 @@
 
 生产部署使用 GitHub + Cloudflare Pages，网站不依赖这台 Mac：
 
-- GitHub 仓库：`https://github.com/jearthliu/picrow`
+- GitHub 仓库：`https://github.com/leowyleo/picrow`
 - Cloudflare Pages 输出目录：`docs/site`
 - 公网入口：`https://picrow.leowy.cc/`
 - 英文首页：`https://picrow.leowy.cc/`

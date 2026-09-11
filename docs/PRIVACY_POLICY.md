@@ -40,7 +40,7 @@ Operator (English): Leowy
 中文支持页面：<https://picrow.leowy.cc/zh/support>  
 English support page: <https://picrow.leowy.cc/support>
 
-支持联系邮箱：<leowy.lwy@gmail.com>。也可以通过 [GitHub Issues](https://github.com/jearthliu/picrow/issues/new) 反馈问题或提出隐私请求。
+支持联系邮箱：<leowy.lwy@gmail.com>。也可以通过 [GitHub Issues](https://github.com/leowyleo/picrow/issues/new) 反馈问题或提出隐私请求。
 
 ## 政策变更
 

@@ -10,6 +10,7 @@
 - Operator (English): Leowy
 - 隐私政策 URL：`https://picrow.leowy.cc/privacy`
 - 支持 URL：`https://picrow.leowy.cc/support`
+- 支持邮箱：`leowy.lwy@gmail.com`；GitHub Issues 为正式支持渠道
 - 版本：`0.1.0`
 - 主类别：Photo & Video
 - 辅助类别：Utilities（待确认）

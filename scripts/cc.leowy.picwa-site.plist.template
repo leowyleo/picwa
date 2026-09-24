@@ -3,12 +3,12 @@
 <plist version="1.0">
 <dict>
   <key>Label</key>
-  <string>cc.leowy.picrow-site</string>
+  <string>cc.leowy.picwa-site</string>
   <key>ProgramArguments</key>
   <array>
     <string>/usr/bin/env</string>
     <string>python3</string>
-    <string>__PROJECT_ROOT__/scripts/picrow-site-server.py</string>
+    <string>__PROJECT_ROOT__/scripts/picwa-site-server.py</string>
   </array>
   <key>WorkingDirectory</key>
   <string>__PROJECT_ROOT__</string>
@@ -24,8 +24,8 @@
   <key>ProcessType</key>
   <string>Background</string>
   <key>StandardOutPath</key>
-  <string>__PROJECT_ROOT__/logs/picrow-site.log</string>
+  <string>__PROJECT_ROOT__/logs/picwa-site.log</string>
   <key>StandardErrorPath</key>
-  <string>__PROJECT_ROOT__/logs/picrow-site.error.log</string>
+  <string>__PROJECT_ROOT__/logs/picwa-site.error.log</string>
 </dict>
 </plist>

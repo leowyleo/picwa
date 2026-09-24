@@ -784,7 +784,7 @@ private struct EmptyLibraryState: View {
                         .foregroundStyle(.tertiary)
                     Text(L.tr("从一个文件夹开始", "Start with a folder"))
                         .font(.system(size: 23, weight: .semibold))
-                    Text(L.tr("选择存放图片的文件夹；Picrow 也会扫描子文件夹，并按拍摄时间整理，没有拍摄时间时使用文件日期。", "Choose a folder of images. Picrow also scans subfolders, sorting by capture date or by file date when capture date is unavailable."))
+                    Text(L.tr("选择存放图片的文件夹；Picwa 也会扫描子文件夹，并按拍摄时间整理，没有拍摄时间时使用文件日期。", "Choose a folder of images. Picwa also scans subfolders, sorting by capture date or by file date when capture date is unavailable."))
                         .font(.system(size: 14))
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
@@ -879,7 +879,7 @@ struct SettingsSheet: View {
                         .frame(width: 18)
                     VStack(alignment: .leading, spacing: 3) {
                         Text(L.tr("你的图片始终留在这台 Mac 上。", "Your images always stay on this Mac."))
-                        Text(L.tr("Picrow 不移动、修改或上传原始图片。", "Picrow does not move, modify, or upload original images."))
+                        Text(L.tr("Picwa 不移动、修改或上传原始图片。", "Picwa does not move, modify, or upload original images."))
                             .font(.callout)
                             .foregroundStyle(.secondary)
                     }
@@ -976,12 +976,12 @@ private struct LocationManagementSheet: View {
                 .font(.title3.weight(.semibold))
                 .padding(.bottom, 6)
             if kind == .included {
-                Text(L.tr("Picrow 会扫描所选文件夹及其子文件夹中的图片。移除位置不会删除原始文件。", "Picrow scans for images in selected folders and their subfolders. Removing a location does not delete the original files."))
+                Text(L.tr("Picwa 会扫描所选文件夹及其子文件夹中的图片。移除位置不会删除原始文件。", "Picwa scans for images in selected folders and their subfolders. Removing a location does not delete the original files."))
                     .font(.callout)
                     .foregroundStyle(.secondary)
                     .padding(.bottom, 14)
             } else {
-                Text(L.tr("以下位置中的图片不会出现在 Picrow 中", "Images in these locations will not appear in Picrow"))
+                Text(L.tr("以下位置中的图片不会出现在 Picwa 中", "Images in these locations will not appear in Picwa"))
                     .font(.callout)
                     .foregroundStyle(.secondary)
                     .padding(.bottom, 14)
@@ -993,7 +993,7 @@ private struct LocationManagementSheet: View {
                         .foregroundStyle(.secondary)
                     Text(kind == .included ? L.tr("暂无包含位置", "No included locations") : L.tr("暂无忽略位置", "No ignored locations"))
                         .font(.headline)
-                    Text(kind == .included ? L.tr("添加文件夹后，图片会出现在 Picrow 中。", "Add a folder to show its images in Picrow.") : L.tr("添加文件夹后，图片会立即从时间线中排除。", "Add a folder to keep its images out of the timeline."))
+                    Text(kind == .included ? L.tr("添加文件夹后，图片会出现在 Picwa 中。", "Add a folder to show its images in Picwa.") : L.tr("添加文件夹后，图片会立即从时间线中排除。", "Add a folder to keep its images out of the timeline."))
                         .font(.callout)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
@@ -1024,10 +1024,10 @@ private struct LocationManagementSheet: View {
                             .buttonStyle(.borderless)
                             .foregroundStyle(.secondary)
                             .help(kind == .included
-                                  ? L.tr("仅从 Picrow 移除此位置；不会删除原始文件。", "Remove this location from Picrow only; original files stay untouched.")
+                                  ? L.tr("仅从 Picwa 移除此位置；不会删除原始文件。", "Remove this location from Picwa only; original files stay untouched.")
                                   : L.tr("不再忽略此位置。", "Stop ignoring this location."))
                             .accessibilityLabel(kind == .included
-                                                ? L.tr("从 Picrow 移除 \(location.name)", "Remove \(location.name) from Picrow")
+                                                ? L.tr("从 Picwa 移除 \(location.name)", "Remove \(location.name) from Picwa")
                                                 : L.tr("取消忽略 \(location.name)", "Stop ignoring \(location.name)"))
                         }
                         .padding(.vertical, 3)

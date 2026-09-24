@@ -97,8 +97,8 @@ private struct LibrarySettings: Codable {
     private let index: ImageIndex
     private var ignoredAccess: [UUID: URL] = [:]
     init() {
-        density = max(0, min(2, UserDefaults.standard.object(forKey: "Picrow.density") as? Int ?? 1))
-        root = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("PicLook")
+        density = max(0, min(2, UserDefaults.standard.object(forKey: "Picwa.density") as? Int ?? 1))
+        root = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("Picwa")
         index = ImageIndex(url: root.appendingPathComponent("index.sqlite"))
         Task { await restore() }
     }
@@ -195,14 +195,14 @@ private struct LibrarySettings: Codable {
         let next = max(0, min(2, density + step))
         guard next != density else { return }
         density = next
-        UserDefaults.standard.set(next, forKey: "Picrow.density")
+        UserDefaults.standard.set(next, forKey: "Picwa.density")
     }
     func chooseFolders() {
         presentFolderPanel(
             prompt: L.tr("添加文件夹", "Add Folder"),
             message: L.tr(
-                "Picrow 会扫描所选文件夹及其子文件夹中的图片。首次扫描可能需要一些时间。",
-                "Picrow scans for images in the selected folder and its subfolders. The first scan may take a while."
+                "Picwa 会扫描所选文件夹及其子文件夹中的图片。首次扫描可能需要一些时间。",
+                "Picwa scans for images in the selected folder and its subfolders. The first scan may take a while."
             ),
             allowsMultipleSelection: true
         ) { [weak self] urls in
@@ -243,8 +243,8 @@ private struct LibrarySettings: Codable {
         alert.alertStyle = .warning
         alert.messageText = L.tr("这个范围可能包含很多内容", "This location may include a lot of content")
         alert.informativeText = L.tr(
-            "Picrow 会递归检查所选位置中的文件夹。选择整个用户目录或个人文件夹，可能遇到 macOS 保护的位置、出现额外授权提示，并延长扫描时间。建议只选择存放照片的文件夹。",
-            "Picrow checks folders recursively. Scanning all users or your home folder may reach macOS-protected locations, trigger additional permission prompts, and take longer. Choose a folder that contains your photos instead."
+            "Picwa 会递归检查所选位置中的文件夹。选择整个用户目录或个人文件夹，可能遇到 macOS 保护的位置、出现额外授权提示，并延长扫描时间。建议只选择存放照片的文件夹。",
+            "Picwa checks folders recursively. Scanning all users or your home folder may reach macOS-protected locations, trigger additional permission prompts, and take longer. Choose a folder that contains your photos instead."
         )
         alert.addButton(withTitle: L.tr("继续添加", "Add This Location"))
         alert.addButton(withTitle: L.tr("取消", "Cancel"))
@@ -335,8 +335,8 @@ private struct LibrarySettings: Codable {
         presentFolderPanel(
             prompt: L.tr("忽略这些文件夹", "Ignore These Folders"),
             message: L.tr(
-                "所选文件夹及其子文件夹中的图片将从 Picrow 时间线中排除。",
-                "Images in the selected folder and its subfolders will be excluded from the Picrow timeline."
+                "所选文件夹及其子文件夹中的图片将从 Picwa 时间线中排除。",
+                "Images in the selected folder and its subfolders will be excluded from the Picwa timeline."
             ),
             allowsMultipleSelection: true
         ) { [weak self] urls in
@@ -549,10 +549,10 @@ private struct LibrarySettings: Codable {
     }
 }
 
-@main struct PicLookApp: App {
+@main struct PicwaApp: App {
     @StateObject private var library = Library()
     var body: some Scene {
-        WindowGroup("Picrow") { LibraryView(library: library) }
+        WindowGroup("Picwa") { LibraryView(library: library) }
             .defaultSize(width: 980, height: 720)
             .windowStyle(.hiddenTitleBar)
             .windowToolbarStyle(.unifiedCompact)

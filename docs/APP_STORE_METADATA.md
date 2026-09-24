@@ -1,15 +1,15 @@
-# Picrow App Store 元数据草案
+# Picwa App Store 元数据草案
 
 这份文件用于注册通过后复制到 App Store Connect。最终文案、价格、地区和联系方式仍需人工确认。
 
 ## 基本信息
 
-- App 名称：Picrow
-- Bundle ID：`cc.leowy.picrow`
+- App 名称：Picwa
+- Bundle ID：`cc.leowy.picwa`
 - 运营者（中文）：行与未见
 - Operator (English): Leowy
-- 隐私政策 URL：`https://picrow.leowy.cc/privacy`
-- 支持 URL：`https://picrow.leowy.cc/support`
+- 隐私政策 URL：`https://picwa.leowy.cc/privacy`
+- 支持 URL：`https://picwa.leowy.cc/support`
 - 支持邮箱：`leowy.lwy@gmail.com`；GitHub Issues 为正式支持渠道
 - 版本：`0.1.0`
 - 主类别：Photo & Video
@@ -25,9 +25,9 @@
 
 ### 描述
 
-Picrow 是一款本地优先的 macOS 图片时间线工具。
+Picwa 是一款本地优先的 macOS 图片时间线工具。
 
-选择图片所在的文件夹，Picrow 会读取图片真实创建时间，按日期和年份整理成清晰的时间线。你可以快速浏览不同时间范围，调整缩略图密度，多选图片，并在需要时复制、在访达中显示或移到废纸篓。
+选择图片所在的文件夹，Picwa 会读取图片真实创建时间，按日期和年份整理成清晰的时间线。你可以快速浏览不同时间范围，调整缩略图密度，多选图片，并在需要时复制、在访达中显示或移到废纸篓。
 
 主要功能：
 
@@ -38,7 +38,7 @@ Picrow 是一款本地优先的 macOS 图片时间线工具。
 - 仅扫描用户主动选择的文件夹
 - 本地索引，不上传原始图片
 
-Picrow 不会自动删除文件。所有文件操作都由用户明确触发。
+Picwa 不会自动删除文件。所有文件操作都由用户明确触发。
 
 ### 关键词初稿
 
@@ -52,11 +52,11 @@ Browse photos by capture time
 
 ### Description
 
-Picrow is a local-first photo timeline for Mac.
+Picwa is a local-first photo timeline for Mac.
 
-Choose the folders that contain your images and Picrow arranges them by their original creation time. Browse Today, 7 Days, 30 Days, or the full timeline, adjust thumbnail density, select multiple images, and copy or reveal them in Finder when needed.
+Choose the folders that contain your images and Picwa arranges them by their original creation time. Browse Today, 7 Days, 30 Days, or the full timeline, adjust thumbnail density, select multiple images, and copy or reveal them in Finder when needed.
 
-Picrow scans only folders you choose. Original images stay on your Mac, and files are never deleted automatically.
+Picwa scans only folders you choose. Original images stay on your Mac, and files are never deleted automatically.
 
 ### Keywords
 
@@ -64,8 +64,8 @@ photo,image,timeline,organize,metadata,local,Mac,Finder,images
 
 ## 发布前由用户填写
 
-- [x] 隐私政策公开 URL（`https://picrow.leowy.cc/privacy`）
-- [x] 支持 URL（`https://picrow.leowy.cc/support`）
+- [x] 隐私政策公开 URL（`https://picwa.leowy.cc/privacy`）
+- [x] 支持 URL（`https://picwa.leowy.cc/support`）
 - [x] 运营者名称：中文「行与未见」；英文「Leowy」
 - [x] 英文和简体中文商店文案初稿
 - [ ] 支持邮箱和 App Review 联系人

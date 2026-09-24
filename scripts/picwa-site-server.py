@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Serve Picrow's small public site without a third-party web framework."""
+"""Serve Picwa's small public site without a third-party web framework."""
 
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -12,7 +12,7 @@ PRIVACY_PAGE = PROJECT_ROOT / "docs" / "privacy-policy.html"
 PRIVACY_PAGE_EN = SITE_ROOT / "en" / "privacy" / "index.html"
 
 
-class PicrowHandler(SimpleHTTPRequestHandler):
+class PicwaHandler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(SITE_ROOT), **kwargs)
 
@@ -53,8 +53,8 @@ class PicrowHandler(SimpleHTTPRequestHandler):
 def main():
     host = "127.0.0.1"
     port = 3020
-    server = ThreadingHTTPServer((host, port), PicrowHandler)
-    print(f"Picrow site listening on http://{host}:{port}", flush=True)
+    server = ThreadingHTTPServer((host, port), PicwaHandler)
+    print(f"Picwa site listening on http://{host}:{port}", flush=True)
     server.serve_forever()
 
 

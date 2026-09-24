@@ -2,7 +2,7 @@
 set -u
 
 cd "${0:A:h}/.."
-app="${1:-dist/Picrow.app}"
+app="${1:-dist/Picwa.app}"
 failures=0
 
 pass() { print "PASS  $1" }
@@ -15,7 +15,7 @@ if [[ ! -d "$app" ]]; then
 fi
 
 if plutil -lint "$app/Contents/Info.plist" >/dev/null 2>&1; then pass "Info.plist is valid"; else fail "Info.plist is invalid"; fi
-if [[ -x "$app/Contents/MacOS/Picrow" ]]; then pass "executable exists"; else fail "executable missing"; fi
+if [[ -x "$app/Contents/MacOS/Picwa" ]]; then pass "executable exists"; else fail "executable missing"; fi
 if [[ -f "$app/Contents/Resources/AppIcon.icns" ]]; then pass "AppIcon.icns is bundled"; else fail "AppIcon.icns missing"; fi
 if [[ -f "$app/Contents/Resources/PrivacyInfo.xcprivacy" ]] && plutil -lint "$app/Contents/Resources/PrivacyInfo.xcprivacy" >/dev/null 2>&1; then
     pass "PrivacyInfo.xcprivacy is bundled and valid"
@@ -26,10 +26,10 @@ fi
 bundle_id=$(plutil -extract CFBundleIdentifier raw -o - "$app/Contents/Info.plist" 2>/dev/null || true)
 version=$(plutil -extract CFBundleShortVersionString raw -o - "$app/Contents/Info.plist" 2>/dev/null || true)
 build=$(plutil -extract CFBundleVersion raw -o - "$app/Contents/Info.plist" 2>/dev/null || true)
-[[ "$bundle_id" == "cc.leowy.picrow" ]] && pass "Bundle ID: $bundle_id" || fail "unexpected Bundle ID: $bundle_id"
+[[ "$bundle_id" == "cc.leowy.picwa" ]] && pass "Bundle ID: $bundle_id" || fail "unexpected Bundle ID: $bundle_id"
 [[ -n "$version" && -n "$build" ]] && pass "Version/build: $version ($build)" || fail "version/build is incomplete"
 
-archs=$(lipo -info "$app/Contents/MacOS/Picrow" 2>/dev/null || true)
+archs=$(lipo -info "$app/Contents/MacOS/Picwa" 2>/dev/null || true)
 if [[ "$archs" == *arm64* && "$archs" == *x86_64* ]]; then
     pass "universal binary: arm64 + x86_64"
 elif [[ "$archs" == *arm64* ]]; then

@@ -3,13 +3,13 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleIdentifier</key>
-	<string>cc.leowy.picrow</string>
+	<string>cc.leowy.picwa</string>
 	<key>CFBundleName</key>
-	<string>Picrow</string>
+	<string>Picwa</string>
 	<key>CFBundleDisplayName</key>
-	<string>Picrow</string>
+	<string>Picwa</string>
 	<key>CFBundleExecutable</key>
-	<string>Picrow</string>
+	<string>Picwa</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>

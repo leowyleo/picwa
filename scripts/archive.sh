@@ -4,7 +4,7 @@ set -euo pipefail
 cd "${0:A:h}/.."
 export DEVELOPER_DIR="${DEVELOPER_DIR:-/Applications/Xcode.app/Contents/Developer}"
 
-archive_path="${1:-dist/Picrow.xcarchive}"
+archive_path="${1:-dist/Picwa.xcarchive}"
 if [[ -e "$archive_path" ]]; then
     print -u2 "Archive already exists: $archive_path"
     print -u2 "Choose another path or remove this specific archive before retrying."
@@ -14,23 +14,23 @@ fi
 mkdir -p "${archive_path:h}"
 
 xcodebuild \
-    -scheme Picrow \
+    -scheme Picwa \
     -destination 'generic/platform=macOS' \
     -archivePath "$archive_path" \
     archive \
     CODE_SIGNING_ALLOWED=NO \
     CODE_SIGNING_REQUIRED=NO
 
-product="$archive_path/Products/usr/local/bin/Picrow"
-app="$archive_path/Products/Applications/Picrow.app"
+product="$archive_path/Products/usr/local/bin/Picwa"
+app="$archive_path/Products/Applications/Picwa.app"
 if [[ ! -x "$product" ]]; then
     print -u2 "Archived executable was not found: $product"
     exit 1
 fi
 
 mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources"
-cp "$product" "$app/Contents/MacOS/Picrow"
-cp Config/Picrow-Info.plist "$app/Contents/Info.plist"
+cp "$product" "$app/Contents/MacOS/Picwa"
+cp Config/Picwa-Info.plist "$app/Contents/Info.plist"
 cp PrivacyInfo.xcprivacy "$app/Contents/Resources/PrivacyInfo.xcprivacy"
 cp Resources/AppIcon.icns "$app/Contents/Resources/AppIcon.icns"
 

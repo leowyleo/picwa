@@ -11,8 +11,8 @@
 - [ ] 在干净用户环境完成安装、首次授权和重启恢复
 - [ ] 用真实大目录完成性能基线
 - [ ] 生成最终 Mac 商店截图
-- [ ] 在新品牌域名 `https://picwa.leowy.cc/privacy` 验收隐私政策
-- [ ] 在新品牌域名 `https://picwa.leowy.cc/support` 验收支持页
+- [x] 在新品牌域名 `https://picwa.leowy.cc/privacy` 验收隐私政策
+- [x] 在新品牌域名 `https://picwa.leowy.cc/support` 验收支持页
 - [x] 在支持页补充实际支持联系方式：`leowy.lwy@gmail.com` 与 GitHub Issues
 
 ## 需要用户账号或人工输入

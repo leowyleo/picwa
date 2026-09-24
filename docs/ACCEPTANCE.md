@@ -38,4 +38,5 @@
 
 - 对外品牌、SwiftPM 套件、可执行文件、应用包、沙盒 Bundle ID 与线上站点统一为 Picwa。
 - 新 Bundle ID 为 `cc.leowy.picwa`；旧开发容器保留在本机，不会被清理。新身份首次启动将创建独立容器，文件夹需要重新授权。
-- GitHub 与 Cloudflare 的远端更名、部署和新域名验收仍待本次执行；旧网站主机名在新域名验证后保留跳转或兼容访问。
+- GitHub 仓库已更名为 `leowyleo/picwa` 并推送 Picwa 品牌提交；Cloudflare Pages 项目已改名并连接 `picwa.leowy.cc`。
+- 新品牌域名的首页、中英文隐私政策和支持页均实测 HTTP 200；旧网站主机名通过 Cloudflare 301 保留路径和查询参数后跳转至新域名。

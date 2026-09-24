@@ -12,6 +12,8 @@
 - 英文支持页：`https://picwa.leowy.cc/support`
 - 中文支持页：`https://picwa.leowy.cc/zh/support`
 
+旧主机名仅作兼容入口；Cloudflare 将其以 301 重定向到对应 Picwa 路径，并保留查询参数。
+
 `docs/site/_redirects` 保留 `/privacy`、`/support`、`/zh/privacy`、`/zh/support` 这四个 Apple 可直接访问的稳定路径。隐私政策和支持页均应返回 HTTP 200，并显示运营者“行与未见 / Leowy”。支持页提供常见使用说明，并公开支持邮箱 `leowy.lwy@gmail.com` 与 GitHub Issues。
 
 本地服务 `127.0.0.1:3020` 与 Cloudflare Tunnel 路由仅保留作开发或回滚，不作为生产依赖。

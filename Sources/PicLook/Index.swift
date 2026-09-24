@@ -101,9 +101,13 @@ actor ImageIndex {
     func removeFolder(_ folder: URL) throws {
         try connect()
         var stmt: OpaquePointer?
-        guard sqlite3_prepare_v2(db, "DELETE FROM images WHERE folder = ?", -1, &stmt, nil) == SQLITE_OK else { throw failure() }
+        guard sqlite3_prepare_v2(db, "DELETE FROM images WHERE folder = ? OR path = ? OR substr(path, 1, length(?)) = ?", -1, &stmt, nil) == SQLITE_OK else { throw failure() }
         defer { sqlite3_finalize(stmt) }
         bind(folder.path, to: stmt, at: 1)
+        bind(folder.path, to: stmt, at: 2)
+        let prefix = folder.path == "/" ? "/" : folder.path + "/"
+        bind(prefix, to: stmt, at: 3)
+        bind(prefix, to: stmt, at: 4)
         guard sqlite3_step(stmt) == SQLITE_DONE else { throw failure() }
     }
 
@@ -142,7 +146,7 @@ actor ImageIndex {
         guard let files = FileManager.default.enumerator(at: folder, includingPropertiesForKeys: keys, options: [.skipsHiddenFiles, .skipsPackageDescendants], errorHandler: { _, _ in errors += 1; return true }) else { throw IndexFailure(message: L.tr("无法读取目录", "Unable to read the folder")) }
         let extensions: Set<String> = ["jpg", "jpeg", "png", "webp", "gif", "heic", "tiff", "bmp"]
         var stmt: OpaquePointer?
-        let sql = "INSERT INTO images(path,folder,width,height,timeline,observed,modified) VALUES(?,?,?,?,?,?,?) ON CONFLICT(path) DO UPDATE SET width=excluded.width,height=excluded.height,modified=excluded.modified,timeline=excluded.timeline"
+        let sql = "INSERT INTO images(path,folder,width,height,timeline,observed,modified) VALUES(?,?,?,?,?,?,?) ON CONFLICT(path) DO UPDATE SET folder=excluded.folder,width=excluded.width,height=excluded.height,modified=excluded.modified,timeline=excluded.timeline"
         guard sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK else { throw failure() }
         defer { sqlite3_finalize(stmt) }
         var indexed = 0, skipped = 0

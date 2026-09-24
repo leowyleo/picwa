@@ -216,7 +216,7 @@ struct PhotoDay: Identifiable {
         let calendar = Calendar.current
         if calendar.isDateInToday(date) { return L.tr("今天", "Today") }
         if calendar.isDateInYesterday(date) { return L.tr("昨天", "Yesterday") }
-        return date.formatted(.dateTime.year().month().day())
+        return date.formatted(.dateTime.year().month(.twoDigits).day(.twoDigits))
     }
 }
 
@@ -262,12 +262,32 @@ enum TimelineLayout {
         }
         return entries
     }
+
+    static func photoDays(from entries: [TimelineEntry]) -> [PhotoDay] {
+        entries.compactMap { entry in
+            guard case .header(let day) = entry else { return nil }
+            return day
+        }
+    }
 }
 private struct DayAnchorKey: PreferenceKey {
     static var defaultValue: [Date: CGFloat] = [:]
     static func reduce(value: inout [Date: CGFloat], nextValue: () -> [Date: CGFloat]) {
         value.merge(nextValue(), uniquingKeysWith: { _, new in new })
     }
+}
+
+private struct DateIndexAnchorKey: PreferenceKey {
+    static var defaultValue: [Date: CGFloat] = [:]
+    static func reduce(value: inout [Date: CGFloat], nextValue: () -> [Date: CGFloat]) {
+        value.merge(nextValue(), uniquingKeysWith: { _, new in new })
+    }
+}
+
+private enum TimelineSyncDirection {
+    case idle
+    case photoWall
+    case dateIndex
 }
 
 private struct TimelineHeader: View {
@@ -310,63 +330,182 @@ private struct TimelineRow: View {
     }
 }
 
-private struct RingRail: View {
-    let years: [Int]
-    let activeYear: Int?
-    let activeMonth: Int
-    let onTapYear: (Int) -> Void
+private struct DateIndexMonth: Identifiable {
+    let year: Int
+    let month: Int
+    let days: [PhotoDay]
+    var id: Int { year * 100 + month }
+}
+
+private struct DateIndex: View {
+    let days: [PhotoDay]
+    let activeDate: Date?
+    let followsPhotoWall: Bool
+    let onSelectDate: (Date) -> Void
+    let onVisibleDateChange: (Date) -> Void
+
+    private var months: [DateIndexMonth] {
+        let calendar = Calendar.current
+        var keys: [Int] = []
+        var grouped: [Int: [PhotoDay]] = [:]
+        for day in days {
+            let year = calendar.component(.year, from: day.date)
+            let month = calendar.component(.month, from: day.date)
+            let key = year * 100 + month
+            if grouped[key] == nil { keys.append(key) }
+            grouped[key, default: []].append(day)
+        }
+        return keys.compactMap { key in
+            guard let first = grouped[key]?.first else { return nil }
+            return DateIndexMonth(year: calendar.component(.year, from: first.date),
+                                  month: calendar.component(.month, from: first.date),
+                                  days: grouped[key, default: []])
+        }
+    }
+
+    private func twoDigits(_ value: Int) -> String { String(format: "%02d", value) }
 
     var body: some View {
-        ZStack {
+        let focusDate = activeDate ?? days.first?.date ?? Date()
+        let focusYear = Calendar.current.component(.year, from: focusDate)
+        let focusMonth = Calendar.current.component(.month, from: focusDate)
+        let focusDay = Calendar.current.startOfDay(for: focusDate)
+
+        VStack(alignment: .leading, spacing: 0) {
+            VStack(alignment: .leading, spacing: 3) {
+                Text(L.tr("时间", "TIME"))
+                    .font(.caption2.weight(.medium))
+                    .foregroundStyle(.secondary)
+                Text(String(focusYear))
+                    .font(.system(size: 14, weight: .medium))
+                    .monospacedDigit()
+                    .foregroundStyle(.primary)
+                Text(twoDigits(focusMonth))
+                    .font(.system(size: 70, weight: .regular, design: .serif))
+                    .monospacedDigit()
+                    .foregroundStyle(.primary)
+                    .contentTransition(.numericText())
+                    .accessibilityLabel(L.tr("\(focusMonth)月", "Month \(focusMonth)"))
+            }
+            .padding(.horizontal, 12)
+            .padding(.top, 16)
+            .padding(.bottom, 12)
+
             Rectangle()
                 .fill(.separator)
-                .frame(width: 0.5)
-            VStack(spacing: 0) {
-                ForEach(years, id: \.self) { year in
-                    Spacer(minLength: 18)
-                    YearRailCell(year: year,
-                                 active: year == activeYear,
-                                 activeMonth: year == activeYear ? activeMonth : nil,
-                                 onTap: { onTapYear(year) })
-                    Spacer(minLength: 18)
+                .frame(height: 0.5)
+                .padding(.horizontal, 12)
+                .padding(.bottom, 6)
+
+            ScrollViewReader { proxy in
+                ScrollView(.vertical) {
+                        LazyVStack(alignment: .leading, spacing: 0) {
+                            ForEach(months) { group in
+                                VStack(alignment: .leading, spacing: 0) {
+                                    if group.year != focusYear {
+                                        Text(String(group.year))
+                                            .font(.caption.weight(.medium))
+                                            .monospacedDigit()
+                                            .foregroundStyle(.secondary)
+                                            .padding(.top, 12)
+                                            .padding(.bottom, 4)
+                                    }
+                                    if group.year != focusYear || group.month != focusMonth {
+                                        Text(twoDigits(group.month))
+                                            .font(.system(size: 15, weight: .medium).monospacedDigit())
+                                            .foregroundStyle(.secondary)
+                                            .padding(.top, group.year == focusYear ? 12 : 0)
+                                            .padding(.bottom, 2)
+                                    }
+                                    ForEach(group.days) { day in
+                                        DateIndexButton(day: day,
+                                                        active: Calendar.current.startOfDay(for: day.date) == focusDay,
+                                                        onSelect: { onSelectDate(day.date) })
+                                            .background(GeometryReader { itemGeometry in
+                                                Color.clear.preference(
+                                                    key: DateIndexAnchorKey.self,
+                                                    value: [day.date: itemGeometry.frame(in: .named("date-index")).midY]
+                                                )
+                                            })
+                                            .id(day.date)
+                                    }
+                                }
+                                .id(group.id)
+                            }
+                        }
+                        .padding(.horizontal, 8)
+                        .padding(.bottom, 12)
+                    }
+                    .coordinateSpace(name: "date-index")
+                    .scrollIndicators(.hidden)
+                    .onPreferenceChange(DateIndexAnchorKey.self) { anchors in
+                        guard activeDate != nil, !followsPhotoWall, !anchors.isEmpty else { return }
+                        // Keep the active row's center in the focus zone. The selected
+                        // row has a small top inset so its larger numeral never clips
+                        // against the scroll viewport when aligned to .top.
+                        let focusY: CGFloat = 43
+                        guard let date = anchors.min(by: { abs($0.value - focusY) < abs($1.value - focusY) })?.key else { return }
+                        onVisibleDateChange(date)
+                    }
+                    .onAppear {
+                        proxy.scrollTo(focusDay, anchor: .top)
+                    }
+                    .onChange(of: activeDate) { date in
+                        guard let date else { return }
+                        withAnimation(.easeInOut(duration: 0.18)) {
+                            proxy.scrollTo(Calendar.current.startOfDay(for: date), anchor: .top)
+                        }
                 }
             }
-            .padding(.vertical, 6)
         }
-        .animation(.easeInOut(duration: 0.18), value: activeYear)
-        .animation(.easeInOut(duration: 0.18), value: activeMonth)
+        .frame(maxHeight: .infinity, alignment: .top)
+        .animation(.easeInOut(duration: 0.18), value: focusMonth)
+        .animation(.easeInOut(duration: 0.18), value: focusYear)
     }
 }
 
-private struct YearRailCell: View {
-    let year: Int
+private struct DateIndexButton: View {
+    let day: PhotoDay
     let active: Bool
-    let activeMonth: Int?
-    let onTap: () -> Void
+    let onSelect: () -> Void
+
+    private var isRelativeDay: Bool {
+        let calendar = Calendar.current
+        return calendar.isDateInToday(day.date) || calendar.isDateInYesterday(day.date)
+    }
+
+    private var title: String {
+        if isRelativeDay { return day.label }
+        return String(format: "%02d", Calendar.current.component(.day, from: day.date))
+    }
 
     var body: some View {
-        Button(action: onTap) {
-            VStack(spacing: 4) {
-                Circle()
-                    .fill(active ? Color.accentColor : Color.secondary.opacity(0.42))
-                    .frame(width: active ? 8 : 5, height: active ? 8 : 5)
-                Text(String(year))
-                    .font(.system(size: 10, weight: active ? .semibold : .regular))
-                    .foregroundStyle(active ? Color.primary : Color.secondary)
+        Button(action: onSelect) {
+            HStack(spacing: 0) {
+                Spacer(minLength: 0)
+                Text(title)
+                    .font(.system(size: active && !isRelativeDay ? 38 : 14,
+                                  weight: active ? .medium : .regular,
+                                  design: active && !isRelativeDay ? .rounded : .default))
+                    .monospacedDigit()
+                    .foregroundStyle(active ? Color.accentColor : Color.secondary)
+                    .frame(width: 44, alignment: .trailing)
                     .lineLimit(1)
-                if let activeMonth {
-                    Text(L.tr("\(activeMonth)月", "\(activeMonth)"))
-                    .font(.system(size: 9, weight: .medium))
-                    .foregroundStyle(Color.accentColor)
-                }
+                    .minimumScaleFactor(0.8)
+                Rectangle()
+                    .fill(active ? Color.accentColor : Color.clear)
+                    .frame(width: 8, height: 2)
+                    .padding(.leading, 8)
+                Spacer(minLength: 0)
             }
-            .frame(width: 54)
-            .frame(minHeight: 50)
-            .background(active ? Color.accentColor.opacity(0.10) : .clear, in: Capsule())
-            .contentShape(Capsule())
+            .frame(minHeight: active && !isRelativeDay ? 66 : 44)
+            .padding(.top, active && !isRelativeDay ? 10 : 0)
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(L.tr("跳至 \(year) 年", "Jump to \(year)"))
+        .accessibilityLabel(day.label)
+        .accessibilityAddTraits(active ? [.isSelected, .isButton] : .isButton)
+        .accessibilityHint(L.tr("将照片墙定位到这一天", "Scroll the photo wall to this day"))
     }
 }
 
@@ -375,8 +514,9 @@ struct LibraryView: View {
     @State private var anchor: String?
     @State private var layoutEntries: [TimelineEntry] = []
     @State private var layoutKey = ""
-    @State private var activeYear: Int?
-    @State private var activeMonth: Int = 0
+    @State private var activeDate: Date?
+    @State private var syncDirection: TimelineSyncDirection = .idle
+    @State private var syncResetTask: Task<Void, Never>?
     @State private var scrollProxy: ScrollViewProxy?
     @State private var escapeMonitor: Any?
     private func select(_ item: IndexedImage) {
@@ -394,27 +534,71 @@ struct LibraryView: View {
         layoutEntries = TimelineLayout.entries(days)
         layoutKey = key
     }
-    private func updateActive(_ anchors: [Date: CGFloat]) {
+    private func updateActive(_ anchors: [Date: CGFloat], viewportHeight: CGFloat) {
+        guard syncDirection != .dateIndex else { return }
         guard !anchors.isEmpty else { return }
-        let top = anchors.min(by: { abs($0.value) < abs($1.value) })!.key
-        let calendar = Calendar.current
-        let year = calendar.component(.year, from: top)
-        let month = calendar.component(.month, from: top)
-        if year != activeYear { activeYear = year }
-        if month != activeMonth { activeMonth = month }
+        let focusY = viewportHeight / 2
+        guard let focused = anchors.min(by: { abs($0.value - focusY) < abs($1.value - focusY) })?.key else { return }
+        let date = Calendar.current.startOfDay(for: focused)
+        guard date != activeDate else { return }
+        syncDirection = .photoWall
+        activeDate = date
+        resetSyncDirection(after: 550)
+    }
+    private func handleDateIndexFocus(_ date: Date) {
+        guard syncDirection != .photoWall else { return }
+        let normalizedDate = Calendar.current.startOfDay(for: date)
+        guard normalizedDate != activeDate else { return }
+        syncDirection = .dateIndex
+        activeDate = normalizedDate
+        scrollToDate(normalizedDate)
+        resetSyncDirection(after: 550)
+    }
+    private func resetSyncDirection(after delay: UInt64) {
+        syncResetTask?.cancel()
+        syncResetTask = Task { @MainActor in
+            try? await Task.sleep(nanoseconds: delay * 1_000_000)
+            guard !Task.isCancelled else { return }
+            syncDirection = .idle
+        }
     }
     private func openLegacySettings() {
         NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
     }
-    private func scrollToYear(_ year: Int) {
-        guard let image = library.images.filter({ Calendar.current.component(.year, from: $0.date) == year }).max(by: { $0.date < $1.date }) else { return }
-        let target = Calendar.current.startOfDay(for: image.date)
-        withAnimation(.easeInOut(duration: 0.35)) { scrollProxy?.scrollTo(target, anchor: .top) }
+    private func scrollToDate(_ date: Date) {
+        withAnimation(.easeInOut(duration: 0.35)) {
+            scrollProxy?.scrollTo(Calendar.current.startOfDay(for: date), anchor: .center)
+        }
     }
     var body: some View {
         VStack(spacing: 0) {
             if library.scanning {
                 HStack(spacing: 8) { ProgressView().controlSize(.mini); Text(library.status).font(.caption).foregroundStyle(.secondary); Spacer() }.padding(.horizontal, 24).padding(.vertical, 6)
+            }
+            if let issue = library.issues.last {
+                HStack(alignment: .center, spacing: 8) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundStyle(.orange)
+                        .accessibilityHidden(true)
+                    Text(issue + (library.issues.count > 1 ? L.tr("（另有 \(library.issues.count - 1) 条）", " (+\(library.issues.count - 1) more)") : ""))
+                        .font(.callout)
+                        .lineLimit(2)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    if library.hasConfiguredSource && !library.scanning {
+                        Button(L.tr("重新扫描", "Rescan"), action: library.rescan)
+                            .buttonStyle(.link)
+                    }
+                    Button {
+                        library.clearIssues()
+                    } label: {
+                        Image(systemName: "xmark")
+                    }
+                    .buttonStyle(.plain)
+                    .help(L.tr("关闭提示", "Dismiss message"))
+                    .accessibilityLabel(L.tr("关闭提示", "Dismiss message"))
+                }
+                .padding(.horizontal, 24)
+                .padding(.vertical, 7)
             }
             if !library.hasConfiguredSource {
                 EmptyLibraryState(addFolder: library.chooseFolders)
@@ -426,15 +610,20 @@ struct LibraryView: View {
                 }.frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 GeometryReader { geometry in
-                    let railWidth: CGFloat = 76
+                    let railWidth: CGFloat = 104
                     let width = max(1, geometry.size.width - railWidth - 48)
                     let key = "\(library.revision)|\(library.range)|\(library.density)|\(Int(width))"
                     let entries = layoutKey == key
                         ? layoutEntries
                         : TimelineLayout.entries(TimelineLayout.days(library.images, width: width, target: [110.0, 165.0, 230.0][library.density]))
+                    let photoDays = TimelineLayout.photoDays(from: entries)
                     let draggedPaths = library.selection.sorted()
                     HStack(spacing: 0) {
-                        RingRail(years: library.years, activeYear: activeYear, activeMonth: activeMonth, onTapYear: { scrollToYear($0) })
+                        DateIndex(days: photoDays,
+                                  activeDate: activeDate,
+                                  followsPhotoWall: syncDirection == .photoWall,
+                                  onSelectDate: scrollToDate,
+                                  onVisibleDateChange: handleDateIndexFocus)
                             .frame(minWidth: railWidth, maxWidth: railWidth, maxHeight: .infinity)
                             .background(Color.secondary.opacity(0.05))
                             .overlay(alignment: .trailing) { Rectangle().fill(.separator).frame(width: 0.5) }
@@ -464,10 +653,13 @@ struct LibraryView: View {
                             }
                             .id(library.range)
                             .coordinateSpace(name: "timeline")
-                            .onPreferenceChange(DayAnchorKey.self) { updateActive($0) }
+                            .onPreferenceChange(DayAnchorKey.self) { updateActive($0, viewportHeight: geometry.size.height) }
                             .onChange(of: library.range) { _ in
+                                syncResetTask?.cancel()
+                                syncDirection = .idle
                                 library.selection = []
                                 anchor = nil
+                                activeDate = nil
                             }
                             .onChange(of: key) { newKey in cacheLayout(key: newKey, width: width) }
                             .onAppear {
@@ -513,6 +705,7 @@ struct LibraryView: View {
         .frame(minWidth: 620, minHeight: 440)
         .background(Color(nsColor: .windowBackgroundColor))
         .background(WindowDragArea())
+        .onDisappear { syncResetTask?.cancel() }
         .animation(.easeInOut(duration: 0.2), value: library.selection.count)
         .toolbar {
             ToolbarItemGroup(placement: .principal) {
@@ -526,8 +719,8 @@ struct LibraryView: View {
             ToolbarItemGroup(placement: .primaryAction) {
                 HStack(spacing: 10) {
                     Text(L.imageCount(library.images.count))
-                        .foregroundStyle(.tertiary)
-                        .font(.system(size: 11, weight: .medium))
+                        .foregroundStyle(.secondary)
+                        .font(.system(size: 12, weight: .medium))
                         .padding(.horizontal, 8)
                         .accessibilityLabel(L.imageCount(library.images.count))
                     if #available(macOS 14.0, *) {
@@ -591,7 +784,7 @@ private struct EmptyLibraryState: View {
                         .foregroundStyle(.tertiary)
                     Text(L.tr("从一个文件夹开始", "Start with a folder"))
                         .font(.system(size: 23, weight: .semibold))
-                    Text(L.tr("选择图片所在的文件夹，Picrow 会按真实创建时间整理。", "Choose a folder of images. Picrow will arrange them by their original creation time."))
+                    Text(L.tr("选择存放图片的文件夹；Picrow 也会扫描子文件夹，并按拍摄时间整理，没有拍摄时间时使用文件日期。", "Choose a folder of images. Picrow also scans subfolders, sorting by capture date or by file date when capture date is unavailable."))
                         .font(.system(size: 14))
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
@@ -625,8 +818,8 @@ private struct TimelineRangeButton: View {
     var body: some View {
         Button { selection = value } label: {
             Text(title)
-                .font(.system(size: 11, weight: selection == value ? .semibold : .regular))
-                .foregroundStyle(selection == value ? .primary : .tertiary)
+                .font(.system(size: 12, weight: selection == value ? .semibold : .regular))
+                .foregroundStyle(selection == value ? .primary : .secondary)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 4)
         }
@@ -782,7 +975,12 @@ private struct LocationManagementSheet: View {
             Text(kind == .included ? L.tr("包含的位置", "Included Locations") : L.tr("忽略的位置", "Ignored Locations"))
                 .font(.title3.weight(.semibold))
                 .padding(.bottom, 6)
-            if kind == .ignored {
+            if kind == .included {
+                Text(L.tr("Picrow 会扫描所选文件夹及其子文件夹中的图片。移除位置不会删除原始文件。", "Picrow scans for images in selected folders and their subfolders. Removing a location does not delete the original files."))
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                    .padding(.bottom, 14)
+            } else {
                 Text(L.tr("以下位置中的图片不会出现在 Picrow 中", "Images in these locations will not appear in Picrow"))
                     .font(.callout)
                     .foregroundStyle(.secondary)
@@ -819,16 +1017,18 @@ private struct LocationManagementSheet: View {
                                 }
                             }
                             Spacer(minLength: 8)
-                            Button {
+                            Button(kind == .included ? L.tr("移除", "Remove") : L.tr("取消忽略", "Unignore")) {
                                 if kind == .included { library.removeIncludedFolder(location.id) }
                                 else { library.removeIgnoredFolder(location.id) }
-                            } label: {
-                                Image(systemName: "trash")
                             }
                             .buttonStyle(.borderless)
                             .foregroundStyle(.secondary)
-                            .help(L.tr("删除此位置", "Remove this location"))
-                            .accessibilityLabel(L.tr("删除 \(location.name)", "Remove \(location.name)"))
+                            .help(kind == .included
+                                  ? L.tr("仅从 Picrow 移除此位置；不会删除原始文件。", "Remove this location from Picrow only; original files stay untouched.")
+                                  : L.tr("不再忽略此位置。", "Stop ignoring this location."))
+                            .accessibilityLabel(kind == .included
+                                                ? L.tr("从 Picrow 移除 \(location.name)", "Remove \(location.name) from Picrow")
+                                                : L.tr("取消忽略 \(location.name)", "Stop ignoring \(location.name)"))
                         }
                         .padding(.vertical, 3)
                     }
